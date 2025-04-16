@@ -5,6 +5,8 @@
 
 #include "utils/type_helper_hidden.hpp"
 
+// Useful utilities, needs to be made global in the future
+
 STDS_START
 
 HIDDEN_STDS_START

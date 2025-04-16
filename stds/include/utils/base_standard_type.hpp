@@ -23,7 +23,7 @@ using _msv__uint16_t = unsigned __int16;
 using _msv__uint32_t = unsigned __int32;
 using _msv__uint64_t = unsigned __int64;
 using _msv__wchar_t = __wchar_t;
-#else
+#else // | for better support |
 using _msv__int8_t = HSTDS_::i8;
 using _msv__int16_t = HSTDS_::i16;
 using _msv__int32_t = HSTDS_::i32;
@@ -42,10 +42,10 @@ public:
     using type = __remove_all_t<_Ty>;
 private:
     // Supported types:
-    // bool, char, char8_t, unsigned char, signed char, __int8,
-    // char16_t, __int16, short, unsigned short, wchar_t, __wchar_t,
-    // char32_t, float, __int32, int, unsigned int, long, unsigned long,
-    // double, __int64, long double, long long, unsigned long long
+    // bool, char, unsigned char/char8_t, char16_t, char32_t, __wchar_t/wchar_t
+    // __int8/i8, __int16/i16, __int32/i32, __int64/i64
+    // unsigned __int8/u8, unsigned __int16/u16, unsigned __int32/u32, unsigned __int64/u64
+    // f32, f64, f128
     static_assert(__is_any_of_v<type,
         bool,
         char,

@@ -5,6 +5,9 @@
 
 #include "config/types.hpp"
 
+// Needed for string conversion
+// Still in experimental
+
 STDS_START
 
 HIDDEN_STDS_START

@@ -5,6 +5,11 @@
 
 #include "config/defines.hpp"
 
+/*
+    Header for working with types
+    Functions move/forward declared here
+*/
+
 #if SUPPORT_CONSTEXPR
 #define __CONSTANCY constexpr
 #else

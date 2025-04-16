@@ -32,14 +32,14 @@ using uptr_t = u32;	// alias uintptr_t
 #endif
 
 #if SUPPORT_CHAR8
-using char_8_t = char8_t;
-#else
-using char_8_t = unsigned char;
+using char_8_t = char8_t;		//
+#else							// used to support char8_t, otherwise just unsigned char
+using char_8_t = unsigned char;	//
 #endif
 
 HIDDEN_STDS_END
 
-using byte = unsigned char;
+using byte = unsigned char; // alias for one byte
 
 STDS_END
 

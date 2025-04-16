@@ -10,6 +10,10 @@
 
 STDS_START
 
+/*
+Wrapper for regular array
+*/
+
 template<typename _Ty, HSTDS_::sz_t N>
 class array {
     static_assert(N != 0, "Cannot create array with size 0");

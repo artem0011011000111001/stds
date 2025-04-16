@@ -248,18 +248,18 @@ public:
 	}
 };
 
-template<class _Ty, HSTDS_::sz_t count = 1, class _Allocator = HSTDS_::base_alloc<_Ty>, class... Args> // make_ptr<type, count, alloc>()
+template<class _Ty, HSTDS_::sz_t count = 1, class _Allocator = HSTDS_::base_alloc<_Ty>, class... Args>		// make_ptr<type, count, alloc>()
 ptr<_Ty> make_ptr(Args&&... args) {
 	return ptr<_Ty, _Allocator>(count, HSTDS_::forward<Args>(args)...);
 }
 
-template<class _Ty, void*, class _Allocator = HSTDS_::base_alloc<_Ty>, class... Args>				   // make_ptr<type, nullptr, alloc>(count)
+template<class _Ty, void*, class _Allocator = HSTDS_::base_alloc<_Ty>, class... Args>						// make_ptr<type, nullptr, alloc>(count)
 ptr<_Ty> make_ptr(HSTDS_::sz_t count, Args&&... args) {
 	return ptr<_Ty, _Allocator>(count, HSTDS_::forward<Args>(args)...);
 }
 
 #if __HAS_CPP20
-template<class _Ty, HSTDS_::null_taker, class _Allocator = HSTDS_::base_alloc<_Ty>, class... Args>	   // make_ptr<type, null, alloc>(count)
+template<class _Ty, HSTDS_::null_taker<nullptr>, class _Allocator = HSTDS_::base_alloc<_Ty>, class... Args>	// make_ptr<type, null, alloc>(count)
 ptr<_Ty> make_ptr(HSTDS_::sz_t count, Args&&... args) {
 	return ptr<_Ty, _Allocator>(count, HSTDS_::forward<Args>(args)...);
 }

@@ -23,6 +23,11 @@ HIDDEN_STDS_END
 HIDDEN_STDS_START
 EXPER_STDS_START
 
+/*
+String
+Still in experimental
+*/
+
 template<class _Allocator = HSTDS_::base_alloc<HSTDS_::ch>>
 class string : public HSTDS_::base_null_t {
 

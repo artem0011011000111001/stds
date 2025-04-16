@@ -15,6 +15,11 @@ STDS_START
 HIDDEN_STDS_START
 EXPER_STDS_START
 
+/*
+Dynamic array
+Still in experimental
+*/
+
 template<typename _Ty, class _Allocator = HSTDS_::base_alloc<_Ty>>
 class dynamic_array : public HSTDS_::base_null_t {
     static_assert(sizeof(_Ty) != 0, "_Ty size is unknown");

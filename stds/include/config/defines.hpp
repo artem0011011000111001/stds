@@ -14,86 +14,115 @@
 #define __CPP98 199711L
 
 #if __CPP >= __CPP23
-#define __HAS_CPP23 1
+#	define __HAS_CPP23 1
 #else
-#define __HAS_CPP23 0
+#	define __HAS_CPP23 0
 #endif
 
 #if __CPP >= __CPP20
-#define __HAS_CPP20 1
+#	define __HAS_CPP20 1
 #else
-#define __HAS_CPP20 0
+#	define __HAS_CPP20 0
 #endif
 
 #if __CPP >= __CPP17
-#define __HAS_CPP17 1
+#	define __HAS_CPP17 1
 #else
-#define __HAS_CPP17 0
+#	define __HAS_CPP17 0
 #endif
 
 #if __CPP >= __CPP14
-#define __HAS_CPP14 1
+#	define __HAS_CPP14 1
 #else
-#define __HAS_CPP14 0
+#	define __HAS_CPP14 0
 #endif
 
 #if __CPP >= __CPP11
-#define __HAS_CPP11 1
+#	define __HAS_CPP11 1
 #else
-#define __HAS_CPP11 0
+#	define __HAS_CPP11 0
 #endif
 
 #if __CPP >= __CPP98
-#define __HAS_CPP98 1
+#	define __HAS_CPP98 1
 #else
-#define __HAS_CPP98 0
+#	define __HAS_CPP98 0
 #endif
 
+#if !__HAS_CPP17
+#error stds library requires at least c++17
+#endif // !__HAS_CPP17
+
 #ifdef BUILDING_STDS
-#define STDS_EXPORT __declspec(dllexport)
+#	define STDS_EXPORT __declspec(dllexport)
 #elif defined(USING_STDS)
-#define STDS_EXPORT __declspec(dllimport)
+#	define STDS_EXPORT __declspec(dllimport)
 #else
-#define STDS_EXPORT
+#	define STDS_EXPORT
 #endif
 
 // Supports
 #ifdef __cpp_char8_t
-#define SUPPORT_CHAR8 1
+#	define SUPPORT_CHAR8 1
 #else
-#define SUPPORT_CHAR8 0
+#	define SUPPORT_CHAR8 0
 #endif // __cpp_char8_t
 
 #ifdef __cpp_constexpr
-#define SUPPORT_CONSTEXPR 1
+#	define SUPPORT_CONSTEXPR 1
 #else
-#define SUPPORT_CONSTEXPR 0
+#	define SUPPORT_CONSTEXPR 0
 #endif // __cpp_constexpr
+
+// unlikely \\
+
+// Checking C++20 Attributes Support
+#if defined(__has_cpp_attribute)
+#	if __has_cpp_attribute(unlikely) >= 202002L
+#		define UNLIKELY [[unlikely]]
+#	endif
+#endif
+
+// If [[unlikely]] is not defined, try __builtin_expect
+#ifndef UNLIKELY
+#	if defined(__GNUC__) || defined(__clang__)
+#		define UNLIKELY
+#		define UNLIKELY_IF(cond) if (__builtin_expect(!!(cond), 0))
+#	else
+#		define UNLIKELY
+#		define UNLIKELY_IF(cond) if (cond)
+#	endif
+#else
+// If [[unlikely]] is supported
+#	define UNLIKELY_IF(cond) if (cond UNLIKELY)
+#endif
+
+// unlikely end \\
 
 // Architecture bits amount
 #ifndef ARCH_BITS
-#if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
-#define ARCH_BITS 64
-#elif defined(__i386__) || defined(_M_IX86) || defined(__arm__)
-#define ARCH_BITS 32
-#else
-#error "Not supported architecture"
-// #define ARCH_BITS (sizeof(void*) * 8) // fallback
-#endif
+#	if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
+#		define ARCH_BITS 64
+#	elif defined(__i386__) || defined(_M_IX86) || defined(__arm__)
+#		define ARCH_BITS 32
+#	else
+#		error "Not supported architecture"
+// #	define ARCH_BITS (sizeof(void*) * 8) // fallback
+#	endif
 #endif
 
 // Has 64-bit
 #ifndef ARCH_64
-#if ARCH_BITS >= 64
-#define ARCH_64 1
-#endif // ARCH_BITS == 64
+#	if ARCH_BITS >= 64
+#		define ARCH_64 1
+#	endif // ARCH_BITS == 64
 #endif
 
 // Has 32-bit
 #ifndef ARCH_32
-#if ARCH_BITS >= 32
-#define ARCH_32 1
-#endif // ARCH_BITS == 32
+#	if ARCH_BITS >= 32
+#		define ARCH_32 1
+#	endif // ARCH_BITS == 32
 #endif
 
 #define STDS_NAMESPACE stds

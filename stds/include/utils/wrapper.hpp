@@ -5,6 +5,12 @@
 
 #include "config/defines.hpp"
 
+/*
+Wrappers to clarify the meaning of arguments
+Example:
+void* memcpy(out<void>* dest, const in<void>* src, in<size_t> count)
+*/
+
 STDS_START
 
 template<typename _Ty>

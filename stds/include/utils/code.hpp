@@ -7,6 +7,7 @@
 
 STDS_START
 
+// This is the structure for errors
 struct code {
 	HSTDS_::i16 value = 0;
 	code(HSTDS_::i16 code_value) : value(code_value) {}
