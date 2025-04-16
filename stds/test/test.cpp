@@ -1,4 +1,4 @@
-﻿#include "string.hpp"
+﻿#include "int.hpp"
 
 using namespace stds;
 
@@ -10,9 +10,9 @@ struct t {
 
 int main() {
 	try {
+		int32 n = i32_cast(100ll);
 	}
 	catch (const code& c) {
-		std::cout << "code: " << c.value;
 	}
 
 	return 0;

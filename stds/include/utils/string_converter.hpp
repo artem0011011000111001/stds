@@ -8,7 +8,7 @@
 STDS_START
 
 HIDDEN_STDS_START
-EXPR_STDS_START
+EXPER_STDS_START
 
 #if SUPPORT_CHAR8
 inline char32_t decode_utf8(const char_8_t*& p) {
@@ -112,7 +112,7 @@ inline HSTDS_::sz_t strlen_utf32(const char32_t* s) {
     return len;
 }
 
-EXPR_STDS_END
+EXPER_STDS_END
 HIDDEN_STDS_END
 
 STDS_END

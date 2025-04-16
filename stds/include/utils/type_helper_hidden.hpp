@@ -5,7 +5,7 @@
 
 #include "config/defines.hpp"
 
-#if __HAS_CPP11
+#if SUPPORT_CONSTEXPR
 #define __CONSTANCY constexpr
 #else
 #define __CONSTANCY const

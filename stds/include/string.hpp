@@ -21,7 +21,7 @@ using other_ch = wchar_t;
 HIDDEN_STDS_END
 
 HIDDEN_STDS_START
-EXPR_STDS_START
+EXPER_STDS_START
 
 template<class _Allocator = HSTDS_::base_alloc<HSTDS_::ch>>
 class string : public HSTDS_::base_null_t {
@@ -174,7 +174,7 @@ public:
     }
 };
 
-EXPR_STDS_END
+EXPER_STDS_END
 HIDDEN_STDS_END
 
 STDS_END

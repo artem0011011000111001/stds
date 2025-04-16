@@ -49,16 +49,26 @@
 #define __HAS_CPP98 0
 #endif
 
-#ifdef BUILDING_DLL
+#ifdef BUILDING_STDS
 #define STDS_EXPORT __declspec(dllexport)
+#elif defined(USING_STDS)
+#define STDS_EXPORT __declspec(dllimport)
 #else
 #define STDS_EXPORT
 #endif
 
 // Supports
 #ifdef __cpp_char8_t
-#define SUPPORT_CHAR8
+#define SUPPORT_CHAR8 1
+#else
+#define SUPPORT_CHAR8 0
 #endif // __cpp_char8_t
+
+#ifdef __cpp_constexpr
+#define SUPPORT_CONSTEXPR 1
+#else
+#define SUPPORT_CONSTEXPR 0
+#endif // __cpp_constexpr
 
 // Architecture bits amount
 #ifndef ARCH_BITS
@@ -98,10 +108,10 @@
 #define HIDDEN_STDS_START namespace HIDDEN_STDS_NAMESPACE {
 #define HIDDEN_STDS_END }
 
-#define EXPR_STDS_NAMESPACE __experimental
+#define EXPER_STDS_NAMESPACE __experimental
 #define EXPRSTDS_ ::stds::__hidden::__experimental
 
-#define EXPR_STDS_START namespace EXPR_STDS_NAMESPACE {
-#define EXPR_STDS_END }
+#define EXPER_STDS_START namespace EXPER_STDS_NAMESPACE {
+#define EXPER_STDS_END }
 
 #endif // _STDS_DEFINES_

@@ -13,7 +13,7 @@
 STDS_START
 
 HIDDEN_STDS_START
-EXPR_STDS_START
+EXPER_STDS_START
 
 template<typename _Ty, class _Allocator = HSTDS_::base_alloc<_Ty>>
 class dynamic_array : public HSTDS_::base_null_t {
@@ -384,7 +384,7 @@ public:
     }
 };
 
-EXPR_STDS_END
+EXPER_STDS_END
 HIDDEN_STDS_END
 
 STDS_END
