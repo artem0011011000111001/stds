@@ -258,12 +258,12 @@ ptr<_Ty> make_ptr(HSTDS_::sz_t count, Args&&... args) {
 	return ptr<_Ty, _Allocator>(count, HSTDS_::forward<Args>(args)...);
 }
 
-#if __HAS_CPP20
-template<class _Ty, HSTDS_::null_taker<nullptr>, class _Allocator = HSTDS_::base_alloc<_Ty>, class... Args>	// make_ptr<type, null, alloc>(count)
-ptr<_Ty> make_ptr(HSTDS_::sz_t count, Args&&... args) {
-	return ptr<_Ty, _Allocator>(count, HSTDS_::forward<Args>(args)...);
-}
-#endif // __HAS_CPP20
+//#if __HAS_CPP20
+//template<class _Ty, HSTDS_::null_taker<nullptr>, class _Allocator = HSTDS_::base_alloc<_Ty>, class... Args>	// make_ptr<type, null, alloc>(count)
+//ptr<_Ty> make_ptr(HSTDS_::sz_t count, Args&&... args) {
+//	return ptr<_Ty, _Allocator>(count, HSTDS_::forward<Args>(args)...);
+//}
+//#endif // __HAS_CPP20
 
 STDS_END
 

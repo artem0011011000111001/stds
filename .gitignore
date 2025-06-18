@@ -16,6 +16,11 @@
 # Mono auto generated files
 mono_crash.*
 
+# VS files
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -27,6 +32,7 @@ x86/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
+[Ll]ib/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
@@ -198,6 +204,8 @@ PublishScripts/
 *.nupkg
 # NuGet Symbol Packages
 *.snupkg
+# Package directory
+packages/
 # The packages folder can be ignored because of Package Restore
 **/[Pp]ackages/*
 # except build/, which is used as an MSBuild target.
