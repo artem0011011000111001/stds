@@ -8,7 +8,7 @@
 export module stds.low.manual_holder;
 
 import std;
-import stds.traits.error_policy;
+import stds.traits.error;
 import stds.utility.nothrow;
 
 #include "macro_utils.h"
@@ -20,13 +20,14 @@ export namespace stds::low {
 	 */
 	template<class T>
 	struct manual_holder {
+		using type = T;
 	private:
-		using nothrow = utility::nothrow<T>;
+		using nothrow = utility::nothrow<type>;
 	public:
-		alignas(T) std::byte buffer[sizeof(T)];
+		alignas(type) std::byte buffer[sizeof(type)];
 
 		template<typename... Args>
-		constexpr T* construct(Args&&... args) 
+		constexpr type* construct(Args&&... args)
 			noexcept(nothrow::template constructible<Args...>)
 		{
 			return std::construct_at(get(), std::forward<Args>(args)...);
@@ -38,12 +39,12 @@ export namespace stds::low {
 			std::destroy_at(get());
 		}
 
-		constexpr T* get() noexcept {
-			return std::launder(reinterpret_cast<T*>(buffer));
+		constexpr type* get() noexcept {
+			return std::launder(reinterpret_cast<type*>(buffer));
 		}
 
-		constexpr const T* get() const noexcept {
-			return std::launder(reinterpret_cast<const T*>(buffer));
+		constexpr const type* get() const noexcept {
+			return std::launder(reinterpret_cast<const type*>(buffer));
 		}
 	};
 
@@ -52,22 +53,23 @@ export namespace stds::low {
 	 */
 	template<class T, traits::error_policy_i Policy = traits::throw_policy>
 	struct manual_holder_with_policy {
+		using type = T;
 	private:
-		using nothrow = utility::nothrow<T>;
+		using nothrow = utility::nothrow<type>;
 		bool constructed = false;
 	public:
-		alignas(T) std::byte buffer[sizeof(T)];
+		alignas(type) std::byte buffer[sizeof(type)];
 
 		constexpr bool is_constructed() const noexcept { return constructed; }
 
 		template<typename... Args>
-		constexpr T* construct(Args&&... args)
+		constexpr type* construct(Args&&... args)
 			noexcept(
 				nothrow::template constructible<Args...> &&
-				traits::is_policy_nothrow<Policy>
+				traits::is_policy_nothrow_v<Policy>
 				)
 		{
-			traits::error_if<Policy>(constructed, "manual_holder has already constructed");
+			traits::make_error_if<Policy>(constructed, "manual_holder has already constructed");
 			constructed = true;
 			return std::construct_at(get(), std::forward<Args>(args)...);
 		}
@@ -75,19 +77,19 @@ export namespace stds::low {
 		constexpr void destroy()
 			noexcept(
 				nothrow::destructible &&
-				traits::is_policy_nothrow<Policy>
+				traits::is_policy_nothrow_v<Policy>
 				)
 		{
-			traits::error_if<Policy>(!constructed, "manual_holder was not constructed");
+			traits::make_error_if<Policy>(!constructed, "manual_holder was not constructed");
 			std::destroy_at(get());
 		}
 
-		constexpr T* get() noexcept {
-			return std::launder(reinterpret_cast<T*>(buffer));
+		constexpr type* get() noexcept {
+			return std::launder(reinterpret_cast<type*>(buffer));
 		}
 
-		constexpr const T* get() const noexcept {
-			return std::launder(reinterpret_cast<const T*>(buffer));
+		constexpr const type* get() const noexcept {
+			return std::launder(reinterpret_cast<const type*>(buffer));
 		}
 	};
 }

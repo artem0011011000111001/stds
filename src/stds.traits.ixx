@@ -8,5 +8,5 @@
 export module stds.traits;
 
 export import stds.traits.utils;
-export import stds.traits.error_policy;
+export import stds.traits.error;
 export import stds.traits.operators;

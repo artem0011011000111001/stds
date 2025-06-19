@@ -10,15 +10,18 @@ export module stds.utility.optional;
 import std;
 import stds.exceptions;
 import stds.low.manual_holder;
-import stds.traits.error_policy;
+import stds.traits.error;
 import stds.utility.nothrow;
 import stds.traits.operators;
 
 #include "macro_utils.h"
 
-export namespace stds::utility {
-	using null_t = std::nullptr_t;
+using namespace stds::traits;
+using namespace stds::traits::operators;
 
+export import stds.utility.null;
+
+export namespace stds::utility {
 	/*
 	 * @brief Class for working with a value that may not exist
 	 * 
@@ -28,8 +31,8 @@ export namespace stds::utility {
 	 * Usage example:
 	 * TODOEXAMPLE
 	 */
-	template<class T, traits::error_policy_i Policy = traits::throw_policy>
-	struct STDS_API optional : private Policy {
+	template<class T, error_policy_i Policy = throw_policy>
+	struct STDS_API optional {
 		using type = T;
 	private:
 		bool has = false; // has_value
@@ -39,16 +42,18 @@ export namespace stds::utility {
 		};
 		using nothrow = nothrow<T>;
 
-		constexpr void throw_null_reference_error() const 
-			noexcept(traits::is_policy_nothrow<Policy>)
+		static constexpr bool policy_nothrow = is_policy_nothrow_v<Policy, type, exceptions::null_reference>;
+
+		constexpr type& throw_null_reference_error() const 
+			noexcept(policy_nothrow)
 		{
-			this->on_error<exceptions::null_reference>("Reference to null value in optional");
+			return make_error<Policy, type, exceptions::null_reference>("Reference to null value in optional");
 		}
 	public:
 		/// @brief Null optional
-		constexpr optional() noexcept { reset(); }
+		constexpr optional() noexcept(nothrow::destructible) { reset(); }
 		/// @brief Null optional
-		constexpr optional(null_t) noexcept : optional() {}
+		constexpr optional(null_t) noexcept(nothrow::destructible) : optional() {}
 
 		/// @brief Construct optional of value
 		constexpr optional(const type& value) 
@@ -101,23 +106,23 @@ export namespace stds::utility {
 		/// @brief Get value reference if it exists
 		/// @returns Value reference
 		constexpr type& value() &
-			noexcept(traits::is_policy_nothrow<Policy>)
+			noexcept(policy_nothrow)
 		{
 			if (has) {
 				return *val.get();
 			}
-			throw_null_reference_error();
+			return throw_null_reference_error();
 		}
 
 		/// @brief Get const value reference if it exists
 		/// @returns Const value reference
 		constexpr const type& value() const&
-			noexcept(traits::is_policy_nothrow<Policy>)
+			noexcept(policy_nothrow)
 		{
 			if (has) {
 				return *val.get();
 			}
-			throw_null_reference_error();
+			return throw_null_reference_error();
 		}
 
 		/// @brief Get value reference if it exists, otherwise return default_value
@@ -184,7 +189,7 @@ export namespace stds::utility {
 				nothrow::copy_constructible
 				)
 		{
-			if (this != &other) {
+			if (this != std::addressof(other)) {
 				if (has) reset(); // 'has' will be false
 				if (other.has) {
 					val.construct(*other);
@@ -200,7 +205,7 @@ export namespace stds::utility {
 				nothrow::move_constructible
 				)
 		{
-			if (this != &other) {
+			if (this != std::addressof(other)) {
 				if (has) reset(); // 'has' will be false
 				if (other.has) {
 					val.construct(std::move(*other));
@@ -229,14 +234,14 @@ export namespace stds::utility {
 		/// @brief Get mutable reference to value if exists
 		/// @returns Value reference
 		constexpr type& operator*()
-			noexcept(traits::is_policy_nothrow<Policy>)
+			noexcept(policy_nothrow)
 		{
 			return value();
 		}
 		/// @brief Get const reference to value if exists
 		/// @returns Const value reference
 		constexpr const type& operator*() const
-			noexcept(traits::is_policy_nothrow<Policy>)
+			noexcept(policy_nothrow)
 		{
 			return value();
 		}
@@ -244,38 +249,38 @@ export namespace stds::utility {
 		/// @brief Get pointer to value if exists
 		/// @returns Value pointer
 		constexpr type* operator->()
-			noexcept(traits::is_policy_nothrow<Policy>)
+			noexcept(policy_nothrow)
 		{
 			if (has) {
 				return val.get();
 			}
-			throw_null_reference_error();
+			return &throw_null_reference_error();
 		}
 		/// @brief Get const pointer to value if exists
 		/// @returns Const value pointer
 		constexpr const type* operator->() const
-			noexcept(traits::is_policy_nothrow<Policy>)
+			noexcept(policy_nothrow)
 		{
 			if (has) {
 				return val.get();
 			}
-			throw_null_reference_error();
+			return &throw_null_reference_error();
 		}
 
 		// =================== Comparison operators optional<T> vs optional<T> =================== //
 
 		/// @returns If both optionals are equal
 		friend constexpr bool operator==(const optional& a, const optional& b)
-			requires(traits::operators::equal_i<type>)
+			requires(equal_i<type>)
 		{
 			return (!a && !b) || (a && b && *a == *b);
 		}
 
 		/// @returns If both optionals are not equal
 		friend constexpr bool operator!=(const optional& a, const optional& b)
-			requires(traits::operators::not_equal_i<type> || traits::operators::equal_i<type>)
+			requires(not_equal_i<type> || equal_i<type>)
 		{
-			if constexpr (traits::operators::not_equal_i<type>) {
+			if constexpr (not_equal_i<type>) {
 				return (!a && !b) ? false
 					: (a && b) ? (*a != *b)
 					: true;
@@ -287,7 +292,7 @@ export namespace stds::utility {
 
 		/// @returns If a < b
 		friend constexpr bool operator<(const optional& a, const optional& b)
-			requires(traits::operators::less_i<type>)
+			requires(less_i<type>)
 		{
 			if (!b) return false;     // b empty => a>=b
 			if (!a) return true;      // a empty, b non-empty => a<b
@@ -296,10 +301,10 @@ export namespace stds::utility {
 
 		/// @returns If a > b
 		friend constexpr bool operator>(const optional& a, const optional& b)
-			requires(traits::operators::greater_i<type> || traits::operators::less_i<type>)
+			requires(greater_i<type> || less_i<type>)
 		{
 			// Use '<' if '>' not directly available
-			if constexpr (traits::operators::greater_i<type>) {
+			if constexpr (greater_i<type>) {
 				if (!a) return false;
 				if (!b) return true;
 				return *a > *b;
@@ -312,12 +317,12 @@ export namespace stds::utility {
 		/// @returns If a <= b
 		friend constexpr bool operator<=(const optional& a, const optional& b)
 			requires(
-			traits::operators::less_equal_i<type> ||
-			traits::operators::less_i<type> ||
-			traits::operators::equal_i<type>
+			less_equal_i<type> ||
+			less_i<type> ||
+			equal_i<type>
 			)
 		{
-			if constexpr (traits::operators::less_equal_i<type>) {
+			if constexpr (less_equal_i<type>) {
 				if (!a && !b) return true;
 				if (!a) return true;
 				if (!b) return false;
@@ -331,12 +336,12 @@ export namespace stds::utility {
 		/// @returns If a >= b
 		friend constexpr bool operator>=(const optional& a, const optional& b)
 			requires(
-			traits::operators::greater_equal_i<type> ||
-			traits::operators::greater_i<type> ||
-			traits::operators::equal_i<type>
+			greater_equal_i<type> ||
+			greater_i<type> ||
+			equal_i<type>
 			)
 		{
-			if constexpr (traits::operators::greater_equal_i<type>) {
+			if constexpr (greater_equal_i<type>) {
 				if (!a && !b) return true;
 				if (!b) return true;
 				if (!a) return false;
@@ -350,7 +355,7 @@ export namespace stds::utility {
 		/// @brief Three-way compare optional vs optional
 		/// @returns ordering: empty < non-empty, both empty equal, otherwise *a <=> *b
 		friend constexpr auto operator<=>(const optional& a, const optional& b)
-			requires(traits::operators::spaceship_i<type>)
+			requires(spaceship_i<type>)
 		{
 			if (!b && !a) return std::strong_ordering::equal;
 			if (!a) return std::strong_ordering::less;
@@ -362,16 +367,16 @@ export namespace stds::utility {
 
 		/// @returns If optional equals value
 		friend constexpr bool operator==(const optional& a, const type& v)
-			requires(traits::operators::equal_i<type>)
+			requires(equal_i<type>)
 		{
 			return a.has && *a == v;
 		}
 
 		/// @returns If optional not equals value
 		friend constexpr bool operator!=(const optional& a, const type& v)
-			requires(traits::operators::not_equal_i<type> || traits::operators::equal_i<type>)
+			requires(not_equal_i<type> || equal_i<type>)
 		{
-			if constexpr (traits::operators::not_equal_i<type>) {
+			if constexpr (not_equal_i<type>) {
 				return !a.has ? true
 					: (*a != v);
 			}
@@ -382,7 +387,7 @@ export namespace stds::utility {
 
 		/// @returns If optional < value
 		friend constexpr bool operator<(const optional& a, const type& v)
-			requires(traits::operators::less_i<type>)
+			requires(less_i<type>)
 		{
 			if (!a) return true;      // empty < any value
 			return *a < v;
@@ -390,9 +395,9 @@ export namespace stds::utility {
 
 		/// @returns If optional > value
 		friend constexpr bool operator>(const optional& a, const type& v)
-			requires(traits::operators::greater_i<type> || traits::operators::less_i<type>)
+			requires(greater_i<type> || less_i<type>)
 		{
-			if constexpr (traits::operators::greater_i<type>) {
+			if constexpr (greater_i<type>) {
 				if (!a) return false;  // empty not > any value
 				return *a > v;
 			}
@@ -404,13 +409,13 @@ export namespace stds::utility {
 		/// @returns If optional <= value
 		friend constexpr bool operator<=(const optional& a, const type& v)
 			requires(
-			traits::operators::less_equal_i<type> ||
-			traits::operators::less_i<type> ||
-			traits::operators::equal_i<type>
+			less_equal_i<type> ||
+			less_i<type> ||
+			equal_i<type>
 			)
 		{
 			if (!a) return true;      // empty <= any
-			if constexpr (traits::operators::less_equal_i<type>) {
+			if constexpr (less_equal_i<type>) {
 				return *a <= v;
 			}
 			else {
@@ -421,13 +426,13 @@ export namespace stds::utility {
 		/// @returns If optional >= value
 		friend constexpr bool operator>=(const optional& a, const type& v)
 			requires(
-		traits::operators::greater_equal_i<type> ||
-			traits::operators::greater_i<type> ||
-			traits::operators::equal_i<type>
+		greater_equal_i<type> ||
+			greater_i<type> ||
+			equal_i<type>
 			)
 		{
 			if (!a) return false;     // empty not >= any (except if compare to default? but follow std: empty < any)
-			if constexpr (traits::operators::greater_equal_i<type>) {
+			if constexpr (greater_equal_i<type>) {
 				return *a >= v;
 			}
 			else {
@@ -438,7 +443,7 @@ export namespace stds::utility {
 		/// @brief Three-way compare optional vs value
 		/// @returns ordering: empty < value, otherwise *a <=> v
 		friend constexpr auto operator<=>(const optional& a, const type& v)
-			requires(traits::operators::spaceship_i<type>)
+			requires(spaceship_i<type>)
 		{
 			if (!a) return std::strong_ordering::less;
 			return *a <=> v;
@@ -448,16 +453,16 @@ export namespace stds::utility {
 
 		/// @returns If value equals optional
 		friend constexpr bool operator==(const type& v, const optional& a)
-			requires(traits::operators::equal_i<type>)
+			requires(equal_i<type>)
 		{
 			return a.has && v == *a;
 		}
 
 		/// @returns If value not equals optional
 		friend constexpr bool operator!=(const type& v, const optional& a)
-			requires(traits::operators::not_equal_i<type> || traits::operators::equal_i<type>)
+			requires(not_equal_i<type> || equal_i<type>)
 		{
-			if constexpr (traits::operators::not_equal_i<type>) {
+			if constexpr (not_equal_i<type>) {
 				return !a.has ? true
 					: (v != *a);
 			}
@@ -468,7 +473,7 @@ export namespace stds::utility {
 
 		/// @returns If value < optional
 		friend constexpr bool operator<(const type& v, const optional& a)
-			requires(traits::operators::less_i<type>)
+			requires(less_i<type>)
 		{
 			if (!a) return false;     // any value not < empty
 			return v < *a;
@@ -476,9 +481,9 @@ export namespace stds::utility {
 
 		/// @returns If value > optional
 		friend constexpr bool operator>(const type& v, const optional& a)
-			requires(traits::operators::greater_i<type> || traits::operators::less_i<type>)
+			requires(greater_i<type> || less_i<type>)
 		{
-			if constexpr (traits::operators::greater_i<type>) {
+			if constexpr (greater_i<type>) {
 				if (!a) return true;   // any value > empty
 				return v > *a;
 			}
@@ -490,13 +495,13 @@ export namespace stds::utility {
 		/// @returns If value <= optional
 		friend constexpr bool operator<=(const type& v, const optional& a)
 			requires(
-			traits::operators::less_equal_i<type> ||
-			traits::operators::less_i<type> ||
-			traits::operators::equal_i<type>
+			less_equal_i<type> ||
+			less_i<type> ||
+			equal_i<type>
 			)
 		{
 			if (!a) return false;
-			if constexpr (traits::operators::less_equal_i<type>) {
+			if constexpr (less_equal_i<type>) {
 				return v <= *a;
 			}
 			else {
@@ -507,13 +512,13 @@ export namespace stds::utility {
 		/// @returns If value >= optional
 		friend constexpr bool operator>=(const type& v, const optional& a)
 			requires(
-			traits::operators::greater_equal_i<type> ||
-			traits::operators::greater_i<type> ||
-			traits::operators::equal_i<type>
+			greater_equal_i<type> ||
+			greater_i<type> ||
+			equal_i<type>
 			)
 		{
 			if (!a) return true;      // any >= empty
-			if constexpr (traits::operators::greater_equal_i<type>) {
+			if constexpr (greater_equal_i<type>) {
 				return v >= *a;
 			}
 			else {
@@ -524,20 +529,12 @@ export namespace stds::utility {
 		/// @brief Three-way compare value vs optional
 		/// @returns ordering: value > empty, otherwise v <=> *a
 		friend constexpr auto operator<=>(const type& v, const optional& a)
-			requires(traits::operators::spaceship_i<type>)
+			requires(spaceship_i<type>)
 		{
 			if (!a) return std::strong_ordering::greater;
 			return v <=> *a;
 		}
 	};
-
-	static_assert(traits::operators::compare_i<stds::utility::optional<int, traits::throw_policy>>, "stds error:" _stringof(optional) "does not match for " _stringof(compare_i));
-
-	/// @brief Null value
-	/// 
-	/// Usage example:
-	/// @code
-	/// optional<int> value = null;
-	/// @endcode
-	inline constexpr null_t null = nullptr;
+	
+	static_assert(compare_i<stds::utility::optional<int>>, "stds error: " stringof(optional) " does not match for " stringof(compare_i));
 }
